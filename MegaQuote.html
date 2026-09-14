@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MegaQuote — Trusted deals for tradespeople</title>
+<style>
+  :root {
+    --charcoal: #23262a;
+    --charcoal-light: #2f3338;
+    --amber: #c98a2c;
+    --amber-light: #e0ac52;
+    --petrol: #2c5f5a;
+    --paper: #f5f2ec;
+    --paper-dim: #e8e3d8;
+    --ink: #1a1c1e;
+    --grey: #6b6a63;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.5;
+  }
+  h1, h2, h3 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+
+  /* HERO */
+  .hero {
+    background: var(--charcoal);
+    color: var(--paper);
+    padding: 64px 24px 80px;
+    text-align: center;
+  }
+  .hero .brand {
+    font-size: 15px;
+    color: var(--amber-light);
+    letter-spacing: 0.08em;
+    margin-bottom: 18px;
+  }
+  .hero h1 {
+    font-size: clamp(32px, 6vw, 52px);
+    color: var(--paper);
+    max-width: 720px;
+    margin: 0 auto 16px;
+    line-height: 1.15;
+  }
+  .hero p.sub {
+    color: #c7c4ba;
+    font-size: 17px;
+    max-width: 520px;
+    margin: 0 auto 36px;
+  }
+  .search-wrap {
+    max-width: 560px;
+    margin: 0 auto;
+    position: relative;
+  }
+  #searchInput {
+    width: 100%;
+    padding: 18px 22px;
+    font-size: 17px;
+    border: none;
+    border-radius: 8px;
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  }
+  #searchInput:focus {
+    outline: 3px solid var(--amber);
+    outline-offset: 2px;
+  }
+  #searchInput::placeholder { color: var(--grey); }
+
+  .suggestions {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.25);
+    overflow: hidden;
+    text-align: left;
+    z-index: 10;
+  }
+  .suggestions button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--paper-dim);
+    padding: 12px 20px;
+    font-size: 15px;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .suggestions button:last-child { border-bottom: none; }
+  .suggestions button:hover, .suggestions button.highlighted {
+    background: var(--paper);
+  }
+  .suggestions button .s-cat {
+    color: var(--grey);
+    font-size: 12px;
+    margin-left: 8px;
+  }
+
+  #clearBtn {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 50%;
+    background: var(--paper-dim);
+    color: var(--grey);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  #clearBtn:hover { background: #ddd8ca; color: var(--ink); }
+
+  /* FILTER PILLS */
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 22px;
+  }
+  .filter-pill {
+    background: var(--charcoal-light);
+    color: #d8d5cb;
+    border: 1px solid #454a50;
+    border-radius: 999px;
+    padding: 8px 18px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .filter-pill:hover { background: #3a3f45; }
+  .filter-pill.active {
+    background: var(--amber);
+    color: var(--charcoal);
+    border-color: var(--amber);
+    font-weight: 600;
+  }
+
+  /* RESULTS */
+  main {
+    max-width: 980px;
+    margin: -48px auto 0;
+    padding: 0 24px 80px;
+  }
+  #resultCount {
+    color: var(--grey);
+    font-size: 14px;
+    margin: 0 0 18px 4px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 18px;
+  }
+  .card {
+    background: white;
+    border: 1px solid var(--paper-dim);
+    border-radius: 10px;
+    padding: 22px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    display: flex;
+    flex-direction: column;
+  }
+  .card .cat {
+    font-size: 12px;
+    color: var(--petrol);
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .card h3 {
+    font-size: 19px;
+    margin-bottom: 8px;
+    color: var(--ink);
+  }
+  .card p.desc {
+    color: #4a4a46;
+    font-size: 14.5px;
+    flex-grow: 1;
+    margin: 0 0 18px;
+  }
+  .card .why {
+    font-size: 13px;
+    color: var(--grey);
+    border-top: 1px solid var(--paper-dim);
+    padding-top: 12px;
+    margin-bottom: 16px;
+  }
+  .card a.cta {
+    display: inline-block;
+    text-align: center;
+    background: var(--amber);
+    color: var(--charcoal);
+    font-weight: 700;
+    text-decoration: none;
+    padding: 12px;
+    border-radius: 6px;
+    transition: background 0.15s;
+  }
+  .card a.cta:hover { background: var(--amber-light); }
+
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--grey);
+  }
+
+  footer {
+    background: var(--charcoal);
+    color: #9a988f;
+    text-align: center;
+    padding: 32px 24px;
+    font-size: 13px;
+  }
+  footer strong { color: var(--paper); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="brand">MEGAQUOTE</div>
+  <h1>Trusted deals for contractors and property owners</h1>
+  <p class="sub">Materials, utilities, waste removal and insurance — all in one place, without hunting across ten different sites.</p>
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="Search: e.g. brick, energy, skip, insurance..." autocomplete="off" style="padding-right:52px;">
+    <button type="button" id="clearBtn" aria-label="Clear search">&#10005;</button>
+    <div class="suggestions" id="suggestions" style="display:none;"></div>
+  </div>
+  <div class="filters" id="filters"></div>
+</div>
+
+<main>
+  <p id="resultCount"></p>
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="emptyState" style="display:none;">Nothing matches your search — try a different word.</div>
+</main>
+
+<footer>
+  <strong>MegaQuote</strong> — an independent directory of offers. Some links are affiliate links.
+</footer>
+
+<script>
+const offers = [
+  { name: "Building Materials Nationwide", category: "Materials", desc: "Wide range of building materials, delivered across the UK.", why: "Trusted supplier, affiliate programme via Awin.", link: "#TWÓJ-LINK-AWIN-1", keywords: "timber wood plywood mdf plasterboard drywall gypsum pipes piping fittings insulation loft cavity pir cement concrete mortar sand aggregate ballast bricks blocks breeze steel rebar lintels roofing tiles felt guttering fascia soffit flooring screed underlay skirting architrave doors windows paint primer filler adhesive sealant silicone screws nails fixings scaffolding damp proofing membrane render plaster welding rods electrodes mig tig arc angle grinder discs metalwork brackets hinges handles ironmongery ladders tarpaulin ppe gloves" },
+  { name: "Materials Market", category: "Materials", desc: "Building materials marketplace — competitive prices, fast delivery for trade and retail customers.", why: "Competitive pricing, well reviewed by tradespeople.", link: "#TWÓJ-LINK-AWIN-2", keywords: "timber wood plywood mdf plasterboard drywall gypsum pipes piping fittings insulation loft cavity pir cement concrete mortar sand aggregate ballast bricks blocks breeze steel rebar lintels roofing tiles felt guttering fascia soffit flooring screed underlay skirting architrave doors windows paint primer filler adhesive sealant silicone screws nails fixings scaffolding damp proofing membrane render plaster welding rods electrodes mig tig arc angle grinder discs metalwork brackets hinges handles ironmongery ladders tarpaulin ppe gloves" },
+  { name: "Reclaimed Brick Company", category: "Materials", desc: "Reclaimed brick, including London Yellow Stock — matched to existing brickwork.", why: "Specialists in period properties and conservation areas.", link: "#TWÓJ-LINK-3", keywords: "salvage reclaimed timber flooring doors flagstones slate roof tiles victorian georgian period listed conservation cobbles setts fireplaces beams" },
+  { name: "Energy Comparison", category: "Utilities", desc: "Compare and switch your energy supplier in a few minutes.", why: "Savings of up to £200+/year, typical commission £15–30 per switch.", link: "#TWÓJ-LINK-ENERGIA", keywords: "electricity gas dual fuel switch supplier tariff bill meter smart meter power" },
+  { name: "Broadband Comparison", category: "Utilities", desc: "The best broadband deals for your postcode.", why: "Quick check of availability and price.", link: "#TWÓJ-LINK-INTERNET", keywords: "wifi fibre internet router phone line mobile signal broadband speed" },
+  { name: "Skip Hire Comparison", category: "Waste removal", desc: "Book a skip for construction waste — compare local prices.", why: "One of the highest affiliate rates — 10% per booking.", link: "#TWÓJ-LINK-SKIP", keywords: "rubbish waste container rubble debris disposal clearance bin muck away hardcore" },
+  { name: "Scrap4Free", category: "Scrap metal", desc: "Find a licensed scrap collector who'll take metal away for free.", why: "Licensed collectors only — compliant with UK law.", link: "#TWÓJ-LINK-ZLOM", keywords: "copper brass steel iron metal collection removal radiators cabling wiring" },
+  { name: "Homeprotect", category: "Insurance", desc: "Property insurance, including cover during and after renovation.", why: "Flexible cover, including for non-standard cases.", link: "#TWÓJ-LINK-UBEZPIECZENIE", keywords: "cover policy landlord buildings contents unoccupied empty property" },
+  { name: "Simply Business", category: "Insurance", desc: "Trade insurance for contractors — public liability, tools, van and employers' liability, compared in minutes.", why: "Compares quotes from a panel including Hiscox, AXA, Churchill and Zurich.", link: "#TWÓJ-LINK-TRADE-INSURANCE", keywords: "public liability employers liability tools tool theft van commercial vehicle contract works stock materials insurance tradesman tradesperson self employed sole trader subcontractor" },
+  { name: "Plant-Pricer", category: "Equipment hire", desc: "Compare tool and plant hire prices across HSS, Speedy Hire, Hewden and more.", why: "Tradespeople save an average of 23% by comparing before booking.", link: "#TWÓJ-LINK-PLANT-PRICER", keywords: "tool hire plant hire equipment rental drill saw breaker disc cutter generator pressure washer cement mixer dumper excavator digger scaffold tower access platform ladder rental compressor" },
+  { name: "BookMyGarage", category: "Vehicle repairs", desc: "Compare mobile mechanics and garages for your work van — no upfront payment needed.", why: "Free comparison, verified garages, no booking fee.", link: "#TWÓJ-LINK-BOOKMYGARAGE", keywords: "mechanic garage mot service servicing brakes clutch exhaust diagnostics van repair car repair breakdown tyres battery" },
+  { name: "Checkatrade", category: "Find a tradesperson", desc: "The UK's leading directory of vetted tradespeople — every trade, every job, checked and reviewed.", why: "Up to 4% commission (via CJ Affiliate, a different network to Awin).", link: "#TWÓJ-LINK-CHECKATRADE-CJ", keywords: "electrician plumber roofer painter decorator carpenter plasterer landscaper gardener bricklayer joiner tiler handyman gas engineer builder tradesperson tradesman find a trade" },
+];
+
+const grid = document.getElementById('grid');
+const searchInput = document.getElementById('searchInput');
+const resultCount = document.getElementById('resultCount');
+const emptyState = document.getElementById('emptyState');
+const filtersEl = document.getElementById('filters');
+
+const categories = ["All", ...new Set(offers.map(o => o.category))];
+let activeCategory = "All";
+
+function renderFilters() {
+  filtersEl.innerHTML = categories.map(cat =>
+    `<button class="filter-pill ${cat === activeCategory ? 'active' : ''}" data-cat="${cat}">${cat}</button>`
+  ).join('');
+  filtersEl.querySelectorAll('.filter-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeCategory = btn.dataset.cat;
+      renderFilters();
+      render();
+    });
+  });
+}
+
+function render() {
+  const query = searchInput.value.trim().toLowerCase();
+  let filtered = offers.filter(o => {
+    const matchesCategory = activeCategory === "All" || o.category === activeCategory;
+    const haystack = (o.name + " " + o.category + " " + o.desc + " " + (o.keywords || "")).toLowerCase();
+    const queryWords = query.split(/\s+/).filter(Boolean);
+    const matchesQuery = !query || queryWords.every(w => haystack.includes(w));
+    return matchesCategory && matchesQuery;
+  });
+
+  let fallbackNotice = "";
+  // FALLBACK: if a search term matches nothing at all, still surface the general
+  // materials merchants — they stock a huge range we can never fully list as keywords.
+  if (filtered.length === 0 && query && activeCategory === "All") {
+    filtered = offers.filter(o => o.category === "Materials");
+    fallbackNotice = `<p style="grid-column: 1 / -1; color:var(--grey); font-size:14px; margin: 0 0 4px;">No exact match for "${query}" — but these general merchants stock a huge range and are worth checking directly:</p>`;
+  }
+
+  resultCount.textContent = fallbackNotice ? "" : (filtered.length === offers.length
+    ? `${filtered.length} trusted offers`
+    : `${filtered.length} of ${offers.length} offers`);
+
+  grid.innerHTML = fallbackNotice + filtered.map(o => `
+    <div class="card">
+      <div class="cat">${o.category}</div>
+      <h3>${o.name}</h3>
+      <p class="desc">${o.desc}</p>
+      <p class="why">${o.why}</p>
+      <a class="cta" href="${o.link}" target="_blank" rel="noopener">View offer</a>
+    </div>
+  `).join('');
+
+  emptyState.style.display = filtered.length === 0 ? 'block' : 'none';
+}
+
+const suggestionsEl = document.getElementById('suggestions');
+const clearBtn = document.getElementById('clearBtn');
+
+function toggleClearBtn() {
+  clearBtn.style.display = searchInput.value.length > 0 ? 'flex' : 'none';
+}
+clearBtn.addEventListener('mousedown', (e) => e.preventDefault());
+clearBtn.addEventListener('click', () => {
+  searchInput.value = '';
+  toggleClearBtn();
+  suggestionsEl.style.display = 'none';
+  render();
+  searchInput.focus();
+});
+
+// Broad vocabulary of real-world search terms, independent of which offer
+// happens to carry them — lets the dropdown suggest actual words, not just
+// business names, even for things we don't have a dedicated card for yet.
+const vocabulary = [
+  "brick","bricks","block","blocks","breeze block","timber","wood","plywood","mdf","osb",
+  "plasterboard","drywall","gypsum","plaster","render","screed","cement","concrete","mortar",
+  "sand","aggregate","ballast ","hardcore","rebar","lintel","lintels","beam","beams","joist","joists",
+  "insulation","loft insulation","cavity wall insulation","pir board","rockwool","fibreglass",
+  "roofing","roof tiles","slate","slates","felt","guttering","fascia","soffit","flashing","ridge tile",
+  "flooring","laminate flooring","underlay","skirting","architrave","tiles","tiling","grout","adhesive",
+  "door","doors","external door","internal door","window","windows","double glazing","upvc","glazing",
+  "paint","primer","filler","sealant","silicone","varnish","wood stain",
+  "screws","nails","fixings","brackets","hinges","handles","ironmongery",
+  "welding rods","welding electrodes","mig wire","angle grinder discs","metalwork",
+  "scaffolding","scaffold tower","ladders","tarpaulin","ppe","hard hat","hi vis","safety boots",
+  "pipe","pipes","piping","copper pipe","plastic pipe","fittings","guttering pipe",
+  "damp proofing","damp proof membrane","dpc","waterproofing","tanking",
+  "reclaimed brick","reclaimed timber","reclaimed flooring","salvage","period features",
+  "fireplace","chimney","flue","hearth",
+  "electricity","gas","dual fuel","energy switch","smart meter","broadband","wifi","fibre broadband",
+  "skip","skip hire","waste removal","rubbish clearance","muck away","rubble","site clearance",
+  "scrap metal","copper scrap","brass","steel scrap","cable scrap",
+  "public liability insurance","employers liability insurance","tool insurance","van insurance",
+  "contract works insurance","tradesman insurance","landlord insurance","buildings insurance",
+  "boiler","radiator","radiators","underfloor heating","central heating","plumbing",
+  "electrical cable","consumer unit","socket","switch","led lighting",
+  "kitchen units","worktop","bathroom suite","shower","bath","toilet","basin",
+  "tool hire","plant hire","equipment hire","drill hire","excavator","digger","dumper","breaker",
+  "disc cutter","generator","pressure washer","cement mixer","access platform","scaffold tower hire",
+  "compressor","concrete cutter","floor sander",
+];
+
+function buildSuggestionPool() {
+  const pool = new Map(); // label -> {label, sublabel, value}
+  offers.forEach(o => {
+    if (!pool.has(o.name)) pool.set(o.name, { label: o.name, sublabel: o.category, value: o.name });
+  });
+  categories.filter(c => c !== "All").forEach(c => {
+    if (!pool.has(c)) pool.set(c, { label: c, sublabel: "Category", value: c });
+  });
+  vocabulary.forEach(term => {
+    if (!pool.has(term)) pool.set(term, { label: term, sublabel: "", value: term });
+  });
+  return Array.from(pool.values());
+}
+const suggestionPool = buildSuggestionPool();
+
+function showSuggestions() {
+  const query = searchInput.value.trim().toLowerCase();
+  if (!query) { suggestionsEl.style.display = 'none'; return; }
+
+  const matches = suggestionPool.filter(s =>
+    s.label.toLowerCase().includes(query) && s.label.toLowerCase() !== query
+  ).slice(0, 6);
+
+  if (matches.length === 0) { suggestionsEl.style.display = 'none'; return; }
+
+  suggestionsEl.innerHTML = matches.map(m =>
+    `<button type="button" data-value="${m.value}">${m.label}<span class="s-cat">${m.sublabel}</span></button>`
+  ).join('');
+  suggestionsEl.style.display = 'block';
+
+  suggestionsEl.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      searchInput.value = btn.dataset.value;
+      suggestionsEl.style.display = 'none';
+      render();
+    });
+  });
+}
+
+searchInput.addEventListener('input', () => { render(); showSuggestions(); toggleClearBtn(); });
+searchInput.addEventListener('focus', showSuggestions);
+searchInput.addEventListener('blur', () => { suggestionsEl.style.display = 'none'; });
+searchInput.addEventListener('keydown', (e) => { if (e.key === 'Escape') suggestionsEl.style.display = 'none'; });
+
+renderFilters();
+render();
+</script>
+
+</body>
+</html>
